@@ -2,9 +2,7 @@
 
 print_help() {
     local help_msg="Script used for initializing and configuring new git repositories.
-Usage: ./git_init.sh [LOCAL_REPO_NAME] [REMOTE_REPO_URL]
-
-"
+Usage: ./git_init.sh [LOCAL_REPO_NAME] [REMOTE_REPO_URL]"
     echo "$help_msg"
     exit 0
 }
@@ -33,7 +31,7 @@ check_if_repo() {
 }
 
 load_config() {
-    if [ ! -f ".git_myconfig" ] || [ ! -n "$USER_NAME" ] || [ ! -n "$USER_EMAIL" ] || [ ! -n "$USER_BRANCH" ]; then
+    if [ ! -f ".git_myconfig" ]; then
         while true; do
             read -n 1 -rp "Current directory does not have a configuration file. Create one? [y/n] " ans
             echo
@@ -56,19 +54,19 @@ load_config() {
 }
 
 configure_local_repo() {
-    git config --local user.name "$USER_NAME"
-    git config --local user.email "$USER_EMAIL"
-    git config --local init.defaultBranch "$USER_BRANCH"
+    git -C "$1" config --local user.name "$USER_NAME"
+    git -C "$1" config --local user.email "$USER_EMAIL"
+    git -C "$1" config --local init.defaultBranch "$USER_BRANCH"
 }
 
 create_local_repo() {
     git init "$1"
-    configure_local_repo
+    configure_local_repo "$1"
     echo "# $1" > "$1"/README.md
 }
 
 link_remote_repo() {
-    git remote add origin "$1"
+    git -C "$1" remote add origin "$2"
 }
 
 setup_local_repo() {
@@ -80,6 +78,7 @@ setup_local_repo() {
     create_local_repo "$1"
 }
 
+
 case "$#" in
     0)
         #echo "Called with no args"
@@ -87,15 +86,23 @@ case "$#" in
         ;;
     1)
         #echo "Called with 1 arg"
+        if check_if_repo "."; then
+            echo "Current directory is a git repository. Aborting" >&2
+            exit 1
+        fi
         setup_local_repo "$1"
         ;;
     2)
         #echo "Called with 2 args"
+        if check_if_repo "."; then
+            echo "Current directory is a git repository. Aborting" >&2
+            exit 1
+        fi
         if check_if_repo "$1"; then
-            link_remote_repo "$2"
+            link_remote_repo "$1" "$2"
         else
             setup_local_repo "$1"
-            link_remote_repo "$2"
+            link_remote_repo "$1" "$2"
         fi
         ;;
     *)
