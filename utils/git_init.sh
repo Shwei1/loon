@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
-take_input() {
+process_user_info() {
     read -pr "username: " USER_NAME
     read -pr "email: " USER_EMAIL
     read -pr "default branch name: " USER_BRANCH
+
+    touch ./.git_myconfig
+    {
+        echo "USER_NAME=${USER_NAME}";
+        echo "USER_EMAIL=${USER_EMAIL}";
+        echo "USER_BRANCH=${USER_BRANCH}";
+    } >> ./.git_myconfig
 
     export USER_NAME USER_EMAIL USER_BRANCH
 }
@@ -15,12 +22,12 @@ if [ -d ".git" ]; then
 fi
 
 
-if [ ! -f ".git_myconfig" ]; then
+if [ ! -f ".git_myconfig" ] || [ ! -n "$USER_NAME" ] || [ ! -n "$USER_EMAIL" ] || [ ! -n "$USER_BRANCH" ]; then
     while true; do
         read -pr -n 1 "Current directory does not have a configuration file. Create one? [y/n] " ans
         case "$ans" in
             y|Y)
-                take_input 
+                process_user_info 
                 break
                 ;;
             n|N)
@@ -29,7 +36,7 @@ if [ ! -f ".git_myconfig" ]; then
                 ;;
             *)
                 echo "Enter y or n."
-                
+                ;;
         esac
     done
 fi
