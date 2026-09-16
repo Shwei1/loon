@@ -10,9 +10,9 @@ Usage: ./git_init.sh [LOCAL_REPO_NAME] [REMOTE_REPO_URL]
 }
 
 process_user_info() {
-    read -pr "username: " USER_NAME
-    read -pr "email: " USER_EMAIL
-    read -pr "default branch name: " USER_BRANCH
+    read -rp "username: " USER_NAME
+    read -rp "email: " USER_EMAIL
+    read -rp "default branch name: " USER_BRANCH
 
     touch ./.git_myconfig
     {
@@ -24,18 +24,19 @@ process_user_info() {
     export USER_NAME USER_EMAIL USER_BRANCH
 }
 
-check_if_empty_or_repo() {
-    if [ -d "$1/.git" ] || [ -n "$(find "$1" -maxdepth 1 -mindepth 1)" ]; then
-        return 1
-    else
-        return 0
-    fi
+check_if_nonempty() {
+    [ -d "$1" ] && [ -n "$(find "$1" -maxdepth 1 -mindepth 1)" ]
 }
 
-check_if_config_exists() {
+check_if_repo() {
+    [ -d "$1/.git" ]
+}
+
+load_config() {
     if [ ! -f ".git_myconfig" ] || [ ! -n "$USER_NAME" ] || [ ! -n "$USER_EMAIL" ] || [ ! -n "$USER_BRANCH" ]; then
         while true; do
-            read -pr -n 1 "Current directory does not have a configuration file. Create one? [y/n] " ans
+            read -n 1 -rp "Current directory does not have a configuration file. Create one? [y/n] " ans
+            echo
             case "$ans" in
                 y|Y)
                     process_user_info
@@ -70,6 +71,15 @@ link_remote_repo() {
     git remote add origin "$1"
 }
 
+setup_local_repo() {
+    if check_if_nonempty "$1"; then
+        echo "Given directory exists and is nonempty. Aborting." >&2
+        exit 1
+    fi
+    load_config
+    create_local_repo "$1"
+}
+
 case "$#" in
     0)
         #echo "Called with no args"
@@ -77,20 +87,20 @@ case "$#" in
         ;;
     1)
         #echo "Called with 1 arg"
-        if check_if_empty_or_repo "$1"; then
-            echo "Given directory is already a git repository"
-        fi
-        check_if_config_exists
-        create_local_repo "$1"
+        setup_local_repo "$1"
         ;;
     2)
         #echo "Called with 2 args"
-        check_if_config_exists
-        create_local_repo "$1"
-        link_remote_repo "$2"
+        if check_if_repo "$1"; then
+            link_remote_repo "$2"
+        else
+            setup_local_repo "$1"
+            link_remote_repo "$2"
+        fi
         ;;
     *)
         echo "Too many args"
+        exit 1
         ;;
 esac
 
