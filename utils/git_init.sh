@@ -109,5 +109,3 @@ case "$#" in
         ;;
 esac
 
-export USER_NAME USER_EMAIL USER_BRANCH
-
