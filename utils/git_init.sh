@@ -18,8 +18,6 @@ process_user_info() {
         echo "USER_EMAIL=${USER_EMAIL}";
         echo "USER_BRANCH=${USER_BRANCH}";
     } >> ./.git_myconfig
-
-    export USER_NAME USER_EMAIL USER_BRANCH
 }
 
 check_if_nonempty() {
@@ -110,4 +108,6 @@ case "$#" in
         exit 1
         ;;
 esac
+
+export USER_NAME USER_EMAIL USER_BRANCH
 
