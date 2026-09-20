@@ -392,7 +392,7 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
 	}
 
 	_oname.name = unlikely(is_vmalloc_addr(oname->name)) ? tname :
-								     oname->name;
+							       oname->name;
 	_oname.len = oname->len;
 
 	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, &_oname);

@@ -1655,8 +1655,8 @@ static unsigned long vma_dump_size(struct vm_area_struct *vma,
 	/* By default, dump shared memory if mapped from an anonymous file. */
 	if (vma->vm_flags & VM_SHARED) {
 		if (file_inode(vma->vm_file)->i_nlink == 0 ?
-				  FILTER(ANON_SHARED) :
-				  FILTER(MAPPED_SHARED))
+			    FILTER(ANON_SHARED) :
+			    FILTER(MAPPED_SHARED))
 			goto whole;
 		return 0;
 	}
