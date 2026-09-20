@@ -69,9 +69,9 @@
 static bool dump_vma_snapshot(struct coredump_params *cprm);
 static void free_vma_snapshot(struct coredump_params *cprm);
 
-#define CORE_FILE_NOTE_SIZE_DEFAULT (4*1024*1024)
+#define CORE_FILE_NOTE_SIZE_DEFAULT (4 * 1024 * 1024)
 /* Define a reasonable max cap */
-#define CORE_FILE_NOTE_SIZE_MAX (16*1024*1024)
+#define CORE_FILE_NOTE_SIZE_MAX (16 * 1024 * 1024)
 /*
  * File descriptor number for the pidfd for the thread-group leader of
  * the coredumping task installed into the usermode helper's file
@@ -88,10 +88,10 @@ unsigned int core_file_note_size_limit = CORE_FILE_NOTE_SIZE_DEFAULT;
 static atomic_t core_pipe_count = ATOMIC_INIT(0);
 
 enum coredump_type_t {
-	COREDUMP_FILE		= 1,
-	COREDUMP_PIPE		= 2,
-	COREDUMP_SOCK		= 3,
-	COREDUMP_SOCK_REQ	= 4,
+	COREDUMP_FILE = 1,
+	COREDUMP_PIPE = 2,
+	COREDUMP_SOCK = 3,
+	COREDUMP_SOCK_REQ = 4,
 };
 
 struct core_name {
@@ -157,8 +157,8 @@ static __printf(2, 3) int cn_printf(struct core_name *cn, const char *fmt, ...)
 	return ret;
 }
 
-static __printf(2, 3)
-int cn_esc_printf(struct core_name *cn, const char *fmt, ...)
+static __printf(2, 3) int cn_esc_printf(struct core_name *cn, const char *fmt,
+					...)
 {
 	int cur = cn->used;
 	va_list arg;
@@ -174,8 +174,8 @@ int cn_esc_printf(struct core_name *cn, const char *fmt, ...)
 		 * resulting corefile path to consist of a ".." or ".".
 		 */
 		if ((cn->used - cur == 1 && cn->corename[cur] == '.') ||
-				(cn->used - cur == 2 && cn->corename[cur] == '.'
-				&& cn->corename[cur+1] == '.'))
+		    (cn->used - cur == 2 && cn->corename[cur] == '.' &&
+		     cn->corename[cur + 1] == '.'))
 			cn->corename[cur] = '!';
 
 		/*
@@ -300,18 +300,24 @@ static bool coredump_parse(struct core_name *cn, struct coredump_params *cprm,
 		 * parameters in the future.
 		 */
 		if (strchr(cn->corename, ' ')) {
-			coredump_report_failure("Coredump socket may not %s contain spaces", cn->corename);
+			coredump_report_failure(
+				"Coredump socket may not %s contain spaces",
+				cn->corename);
 			return false;
 		}
 
 		/* Must not contain ".." in the path. */
 		if (name_contains_dotdot(cn->corename)) {
-			coredump_report_failure("Coredump socket may not %s contain '..' spaces", cn->corename);
+			coredump_report_failure(
+				"Coredump socket may not %s contain '..' spaces",
+				cn->corename);
 			return false;
 		}
 
 		if (strlen(cn->corename) >= UNIX_PATH_MAX) {
-			coredump_report_failure("Coredump socket path %s too long", cn->corename);
+			coredump_report_failure(
+				"Coredump socket path %s too long",
+				cn->corename);
 			return false;
 		}
 
@@ -367,20 +373,19 @@ static bool coredump_parse(struct core_name *cn, struct coredump_params *cprm,
 			case 'p':
 				pid_in_pattern = 1;
 				err = cn_printf(cn, "%d",
-					      task_tgid_vnr(current));
+						task_tgid_vnr(current));
 				break;
 			/* global pid */
 			case 'P':
 				err = cn_printf(cn, "%d",
-					      task_tgid_nr(current));
+						task_tgid_nr(current));
 				break;
 			case 'i':
 				err = cn_printf(cn, "%d",
-					      task_pid_vnr(current));
+						task_pid_vnr(current));
 				break;
 			case 'I':
-				err = cn_printf(cn, "%d",
-					      task_pid_nr(current));
+				err = cn_printf(cn, "%d", task_pid_nr(current));
 				break;
 			/* uid */
 			case 'u':
@@ -414,7 +419,7 @@ static bool coredump_parse(struct core_name *cn, struct coredump_params *cprm,
 			case 'h':
 				down_read(&uts_sem);
 				err = cn_esc_printf(cn, "%s",
-					      utsname()->nodename);
+						    utsname()->nodename);
 				up_read(&uts_sem);
 				break;
 			/* executable, could be changed by prctl PR_SET_NAME etc */
@@ -430,8 +435,7 @@ static bool coredump_parse(struct core_name *cn, struct coredump_params *cprm,
 				break;
 			/* core limit size */
 			case 'c':
-				err = cn_printf(cn, "%lu",
-					      rlimit(RLIMIT_CORE));
+				err = cn_printf(cn, "%lu", rlimit(RLIMIT_CORE));
 				break;
 			/* CPU the task ran on */
 			case 'C':
@@ -455,7 +459,8 @@ static bool coredump_parse(struct core_name *cn, struct coredump_params *cprm,
 				 * cannot be reaped until @current has exited.
 				 */
 				cprm->pid = task_tgid(current);
-				err = cn_printf(cn, "%d", COREDUMP_PIDFD_NUMBER);
+				err = cn_printf(cn, "%d",
+						COREDUMP_PIDFD_NUMBER);
 				break;
 			}
 			default:
@@ -501,8 +506,8 @@ static int zap_process(struct signal_struct *signal, int exit_code)
 	return nr;
 }
 
-static int zap_threads(struct task_struct *tsk,
-			struct core_state *core_state, int exit_code)
+static int zap_threads(struct task_struct *tsk, struct core_state *core_state,
+		       int exit_code)
 {
 	struct signal_struct *signal = tsk->signal;
 	int nr = -EAGAIN;
@@ -534,7 +539,8 @@ static int coredump_wait(int exit_code, struct core_state *core_state)
 		struct core_thread *ptr;
 
 		wait_for_completion_state(&core_state->startup,
-					  TASK_UNINTERRUPTIBLE|TASK_FREEZABLE);
+					  TASK_UNINTERRUPTIBLE |
+						  TASK_FREEZABLE);
 		/*
 		 * Wait for all the threads to become inactive, so that
 		 * all the thread context (extended register state, like
@@ -659,13 +665,14 @@ static int umh_coredump_setup(struct subprocess_info *info, struct cred *new)
 		return err;
 
 	/* and disallow core files too */
-	current->signal->rlim[RLIMIT_CORE] = (struct rlimit){1, 1};
+	current->signal->rlim[RLIMIT_CORE] = (struct rlimit){ 1, 1 };
 
 	return 0;
 }
 
 #ifdef CONFIG_UNIX
-static bool coredump_sock_connect(struct core_name *cn, struct coredump_params *cprm)
+static bool coredump_sock_connect(struct core_name *cn,
+				  struct coredump_params *cprm)
 {
 	struct file *file __free(fput) = NULL;
 	struct sockaddr_un addr = {
@@ -710,14 +717,18 @@ static bool coredump_sock_connect(struct core_name *cn, struct coredump_params *
 	 */
 	pidfs_coredump(cprm);
 
-	retval = kernel_connect(socket, (struct sockaddr_unsized *)(&addr), addr_len,
-				O_NONBLOCK | SOCK_COREDUMP);
+	retval = kernel_connect(socket, (struct sockaddr_unsized *)(&addr),
+				addr_len, O_NONBLOCK | SOCK_COREDUMP);
 
 	if (retval) {
 		if (retval == -EAGAIN)
-			coredump_report_failure("Coredump socket %s receive queue full", addr.sun_path);
+			coredump_report_failure(
+				"Coredump socket %s receive queue full",
+				addr.sun_path);
 		else
-			coredump_report_failure("Coredump socket connection %s failed %d", addr.sun_path, retval);
+			coredump_report_failure(
+				"Coredump socket connection %s failed %d",
+				addr.sun_path, retval);
 		return false;
 	}
 
@@ -731,7 +742,9 @@ static bool coredump_sock_connect(struct core_name *cn, struct coredump_params *
 	return true;
 }
 
-static inline bool coredump_sock_recv(struct file *file, struct coredump_ack *ack, size_t size, int flags)
+static inline bool coredump_sock_recv(struct file *file,
+				      struct coredump_ack *ack, size_t size,
+				      int flags)
 {
 	struct msghdr msg = {};
 	struct kvec iov = { .iov_base = ack, .iov_len = size };
@@ -742,7 +755,8 @@ static inline bool coredump_sock_recv(struct file *file, struct coredump_ack *ac
 	return ret == size;
 }
 
-static inline bool coredump_sock_send(struct file *file, struct coredump_req *req)
+static inline bool coredump_sock_send(struct file *file,
+				      struct coredump_req *req)
 {
 	struct msghdr msg = { .msg_flags = MSG_NOSIGNAL };
 	struct kvec iov = { .iov_base = req, .iov_len = sizeof(*req) };
@@ -754,7 +768,8 @@ static inline bool coredump_sock_send(struct file *file, struct coredump_req *re
 
 static_assert(sizeof(enum coredump_mark) == sizeof(__u32));
 
-static inline bool coredump_sock_mark(struct file *file, enum coredump_mark mark)
+static inline bool coredump_sock_mark(struct file *file,
+				      enum coredump_mark mark)
 {
 	struct msghdr msg = { .msg_flags = MSG_NOSIGNAL };
 	struct kvec iov = { .iov_base = &mark, .iov_len = sizeof(mark) };
@@ -792,13 +807,14 @@ static inline void coredump_sock_shutdown(struct file *file)
 	kernel_sock_shutdown(socket, SHUT_WR);
 }
 
-static bool coredump_sock_request(struct core_name *cn, struct coredump_params *cprm)
+static bool coredump_sock_request(struct core_name *cn,
+				  struct coredump_params *cprm)
 {
 	struct coredump_req req = {
-		.size		= sizeof(struct coredump_req),
-		.mask		= COREDUMP_KERNEL | COREDUMP_USERSPACE |
-				  COREDUMP_REJECT | COREDUMP_WAIT,
-		.size_ack	= sizeof(struct coredump_ack),
+		.size = sizeof(struct coredump_req),
+		.mask = COREDUMP_KERNEL | COREDUMP_USERSPACE | COREDUMP_REJECT |
+			COREDUMP_WAIT,
+		.size_ack = sizeof(struct coredump_ack),
 	};
 	struct coredump_ack ack = {};
 	ssize_t usize;
@@ -863,9 +879,17 @@ static bool coredump_socket(struct core_name *cn, struct coredump_params *cprm)
 	return coredump_sock_request(cn, cprm);
 }
 #else
-static inline void coredump_sock_wait(struct file *file) { }
-static inline void coredump_sock_shutdown(struct file *file) { }
-static inline bool coredump_socket(struct core_name *cn, struct coredump_params *cprm) { return false; }
+static inline void coredump_sock_wait(struct file *file)
+{
+}
+static inline void coredump_sock_shutdown(struct file *file)
+{
+}
+static inline bool coredump_socket(struct core_name *cn,
+				   struct coredump_params *cprm)
+{
+	return false;
+}
 #endif
 
 /* cprm->dumpable is the snapshot of task dumpability at dump start. */
@@ -887,7 +911,8 @@ static bool coredump_file(struct core_name *cn, struct coredump_params *cprm,
 		return false;
 
 	if (coredump_force_suid_safe(cprm) && cn->corename[0] != '/') {
-		coredump_report_failure("this process can only dump core to a fully qualified path, skipping core dump");
+		coredump_report_failure(
+			"this process can only dump core to a fully qualified path, skipping core dump");
 		return false;
 	}
 
@@ -950,11 +975,15 @@ static bool coredump_file(struct core_name *cn, struct coredump_params *cprm,
 	 */
 	idmap = file_mnt_idmap(file);
 	if (!vfsuid_eq_kuid(i_uid_into_vfsuid(idmap, inode), current_fsuid())) {
-		coredump_report_failure("Core dump to %s aborted: cannot preserve file owner", cn->corename);
+		coredump_report_failure(
+			"Core dump to %s aborted: cannot preserve file owner",
+			cn->corename);
 		return false;
 	}
 	if ((inode->i_mode & 0677) != 0600) {
-		coredump_report_failure("Core dump to %s aborted: cannot preserve file permissions", cn->corename);
+		coredump_report_failure(
+			"Core dump to %s aborted: cannot preserve file permissions",
+			cn->corename);
 		return false;
 	}
 	if (!(file->f_mode & FMODE_CAN_WRITE))
@@ -989,20 +1018,23 @@ static bool coredump_pipe(struct core_name *cn, struct coredump_params *cprm,
 		 * right pid if a thread in a multi-threaded
 		 * core_pattern process dies.
 		 */
-		coredump_report_failure("RLIMIT_CORE is set to 1, aborting core");
+		coredump_report_failure(
+			"RLIMIT_CORE is set to 1, aborting core");
 		return false;
 	}
 	cprm->limit = RLIM_INFINITY;
 
 	cn->core_pipe_limit = atomic_inc_return(&core_pipe_count);
 	if (core_pipe_limit && (core_pipe_limit < cn->core_pipe_limit)) {
-		coredump_report_failure("over core_pipe_limit, skipping core dump");
+		coredump_report_failure(
+			"over core_pipe_limit, skipping core dump");
 		return false;
 	}
 
 	helper_argv = kmalloc_objs(*helper_argv, argc + 1);
 	if (!helper_argv) {
-		coredump_report_failure("%s failed to allocate memory", __func__);
+		coredump_report_failure("%s failed to allocate memory",
+					__func__);
 		return false;
 	}
 	for (argi = 0; argi < argc; argi++)
@@ -1025,18 +1057,17 @@ static bool coredump_pipe(struct core_name *cn, struct coredump_params *cprm,
 	 * have this set to NULL.
 	 */
 	if (!cprm->file) {
-		coredump_report_failure("Core dump to |%s disabled", cn->corename);
+		coredump_report_failure("Core dump to |%s disabled",
+					cn->corename);
 		return false;
 	}
 
 	return true;
 }
 
-static bool coredump_write(struct core_name *cn,
-			  struct coredump_params *cprm,
-			  const struct linux_binfmt *binfmt)
+static bool coredump_write(struct core_name *cn, struct coredump_params *cprm,
+			   const struct linux_binfmt *binfmt)
 {
-
 	if (dump_interrupted())
 		return true;
 
@@ -1085,12 +1116,14 @@ static inline bool coredump_skip(const struct coredump_params *cprm,
 }
 
 static void do_coredump(struct core_name *cn, struct coredump_params *cprm,
-			size_t **argv, int *argc, const struct linux_binfmt *binfmt)
+			size_t **argv, int *argc,
+			const struct linux_binfmt *binfmt)
 {
 	trace_coredump(cprm->siginfo->si_signo);
 
 	if (!coredump_parse(cn, cprm, argv, argc)) {
-		coredump_report_failure("format_corename failed, aborting core");
+		coredump_report_failure(
+			"format_corename failed, aborting core");
 		return;
 	}
 
@@ -1191,8 +1224,7 @@ void vfs_coredump(const kernel_siginfo_t *siginfo)
 	if (coredump_wait(siginfo->si_signo, &core_state) < 0)
 		return;
 
-	scoped_with_creds(cred)
-		do_coredump(&cn, &cprm, &argv, &argc, binfmt);
+	scoped_with_creds(cred) do_coredump(&cn, &cprm, &argv, &argc, binfmt);
 	coredump_cleanup(&cn, &cprm);
 	return;
 }
@@ -1364,7 +1396,8 @@ int dump_user_range(struct coredump_params *cprm, unsigned long start,
 				mmap_read_unlock(current->mm);
 				locked = 0;
 			}
-			int stop = !dump_emit_page(cprm, dump_page_copy(page, dump_page));
+			int stop = !dump_emit_page(
+				cprm, dump_page_copy(page, dump_page));
 			put_page(page);
 			if (stop)
 				goto out;
@@ -1408,10 +1441,10 @@ EXPORT_SYMBOL(dump_align);
 
 void validate_coredump_safety(void)
 {
-	if (suid_dumpable == TASK_DUMPABLE_ROOT &&
-	    core_pattern[0] != '/' && core_pattern[0] != '|' && core_pattern[0] != '@') {
-
-		coredump_report_failure("Unsafe core_pattern used with fs.suid_dumpable=2: "
+	if (suid_dumpable == TASK_DUMPABLE_ROOT && core_pattern[0] != '/' &&
+	    core_pattern[0] != '|' && core_pattern[0] != '@') {
+		coredump_report_failure(
+			"Unsafe core_pattern used with fs.suid_dumpable=2: "
 			"pipe handler or fully qualified core dump path required. "
 			"Set kernel.core_pattern before fs.suid_dumpable.");
 	}
@@ -1457,7 +1490,7 @@ static inline bool check_coredump_socket(void)
 }
 
 static int proc_dostring_coredump(const struct ctl_table *table, int write,
-		  void *buffer, size_t *lenp, loff_t *ppos)
+				  void *buffer, size_t *lenp, loff_t *ppos)
 {
 	int error;
 	ssize_t retval;
@@ -1484,61 +1517,60 @@ static int proc_dostring_coredump(const struct ctl_table *table, int write,
 
 static const unsigned int core_file_note_size_min = CORE_FILE_NOTE_SIZE_DEFAULT;
 static const unsigned int core_file_note_size_max = CORE_FILE_NOTE_SIZE_MAX;
-static char core_modes[] = {
-	"file\npipe"
+static char core_modes[] = { "file\npipe"
 #ifdef CONFIG_UNIX
-	"\nsocket"
+			     "\nsocket"
 #endif
 };
 
 static const struct ctl_table coredump_sysctls[] = {
 	{
-		.procname	= "core_uses_pid",
-		.data		= &core_uses_pid,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= proc_dointvec,
+		.procname = "core_uses_pid",
+		.data = &core_uses_pid,
+		.maxlen = sizeof(int),
+		.mode = 0644,
+		.proc_handler = proc_dointvec,
 	},
 	{
-		.procname	= "core_pattern",
-		.data		= core_pattern,
-		.maxlen		= CORENAME_MAX_SIZE,
-		.mode		= 0644,
-		.proc_handler	= proc_dostring_coredump,
+		.procname = "core_pattern",
+		.data = core_pattern,
+		.maxlen = CORENAME_MAX_SIZE,
+		.mode = 0644,
+		.proc_handler = proc_dostring_coredump,
 	},
 	{
-		.procname	= "core_pipe_limit",
-		.data		= &core_pipe_limit,
-		.maxlen		= sizeof(unsigned int),
-		.mode		= 0644,
-		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= SYSCTL_ZERO,
-		.extra2		= SYSCTL_INT_MAX,
+		.procname = "core_pipe_limit",
+		.data = &core_pipe_limit,
+		.maxlen = sizeof(unsigned int),
+		.mode = 0644,
+		.proc_handler = proc_dointvec_minmax,
+		.extra1 = SYSCTL_ZERO,
+		.extra2 = SYSCTL_INT_MAX,
 	},
 	{
-		.procname       = "core_file_note_size_limit",
-		.data           = &core_file_note_size_limit,
-		.maxlen         = sizeof(unsigned int),
-		.mode           = 0644,
-		.proc_handler	= proc_douintvec_minmax,
-		.extra1		= (unsigned int *)&core_file_note_size_min,
-		.extra2		= (unsigned int *)&core_file_note_size_max,
+		.procname = "core_file_note_size_limit",
+		.data = &core_file_note_size_limit,
+		.maxlen = sizeof(unsigned int),
+		.mode = 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1 = (unsigned int *)&core_file_note_size_min,
+		.extra2 = (unsigned int *)&core_file_note_size_max,
 	},
 	{
-		.procname	= "core_sort_vma",
-		.data		= &core_sort_vma,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= proc_douintvec_minmax,
-		.extra1		= SYSCTL_ZERO,
-		.extra2		= SYSCTL_ONE,
+		.procname = "core_sort_vma",
+		.data = &core_sort_vma,
+		.maxlen = sizeof(int),
+		.mode = 0644,
+		.proc_handler = proc_douintvec_minmax,
+		.extra1 = SYSCTL_ZERO,
+		.extra2 = SYSCTL_ONE,
 	},
 	{
-		.procname	= "core_modes",
-		.data		= core_modes,
-		.maxlen		= sizeof(core_modes) - 1,
-		.mode		= 0444,
-		.proc_handler	= proc_dostring,
+		.procname = "core_modes",
+		.data = core_modes,
+		.maxlen = sizeof(core_modes) - 1,
+		.mode = 0444,
+		.proc_handler = proc_dostring,
 	},
 };
 
@@ -1589,7 +1621,7 @@ static bool always_dump_vma(struct vm_area_struct *vma)
 static unsigned long vma_dump_size(struct vm_area_struct *vma,
 				   unsigned long mm_flags)
 {
-#define FILTER(type)	(mm_flags & (1UL << MMF_DUMP_##type))
+#define FILTER(type) (mm_flags & (1UL << MMF_DUMP_##type))
 
 	/* always dump the vdso and vsyscall sections */
 	if (always_dump_vma(vma))
@@ -1623,7 +1655,8 @@ static unsigned long vma_dump_size(struct vm_area_struct *vma,
 	/* By default, dump shared memory if mapped from an anonymous file. */
 	if (vma->vm_flags & VM_SHARED) {
 		if (file_inode(vma->vm_file)->i_nlink == 0 ?
-		    FILTER(ANON_SHARED) : FILTER(MAPPED_SHARED))
+				  FILTER(ANON_SHARED) :
+				  FILTER(MAPPED_SHARED))
 			goto whole;
 		return 0;
 	}
@@ -1641,8 +1674,8 @@ static unsigned long vma_dump_size(struct vm_area_struct *vma,
 	 * If this is the beginning of an executable file mapping,
 	 * dump the first page to aid in determining what was mapped here.
 	 */
-	if (FILTER(ELF_HEADERS) &&
-	    vma->vm_pgoff == 0 && (vma->vm_flags & VM_READ)) {
+	if (FILTER(ELF_HEADERS) && vma->vm_pgoff == 0 &&
+	    (vma->vm_flags & VM_READ)) {
 		if ((READ_ONCE(file_inode(vma->vm_file)->i_mode) & 0111) != 0)
 			return PAGE_SIZE;
 
@@ -1657,7 +1690,7 @@ static unsigned long vma_dump_size(struct vm_area_struct *vma,
 		return DUMP_SIZE_MAYBE_ELFHDR_PLACEHOLDER;
 	}
 
-#undef	FILTER
+#undef FILTER
 
 	return 0;
 
@@ -1670,8 +1703,8 @@ whole:
  * will visit `gate_vma' prior to terminating the search.
  */
 static struct vm_area_struct *coredump_next_vma(struct vma_iterator *vmi,
-				       struct vm_area_struct *vma,
-				       struct vm_area_struct *gate_vma)
+						struct vm_area_struct *vma,
+						struct vm_area_struct *gate_vma)
 {
 	if (gate_vma && (vma == gate_vma))
 		return NULL;
@@ -1696,7 +1729,8 @@ static void free_vma_snapshot(struct coredump_params *cprm)
 	}
 }
 
-static int cmp_vma_size(const void *vma_meta_lhs_ptr, const void *vma_meta_rhs_ptr)
+static int cmp_vma_size(const void *vma_meta_lhs_ptr,
+			const void *vma_meta_rhs_ptr)
 {
 	const struct core_vma_metadata *vma_meta_lhs = vma_meta_lhs_ptr;
 	const struct core_vma_metadata *vma_meta_rhs = vma_meta_rhs_ptr;
@@ -1759,8 +1793,9 @@ static bool dump_vma_snapshot(struct coredump_params *cprm)
 		if (m->dump_size == DUMP_SIZE_MAYBE_ELFHDR_PLACEHOLDER) {
 			char elfmag[SELFMAG];
 
-			if (copy_from_user(elfmag, (void __user *)m->start, SELFMAG) ||
-					memcmp(elfmag, ELFMAG, SELFMAG) != 0) {
+			if (copy_from_user(elfmag, (void __user *)m->start,
+					   SELFMAG) ||
+			    memcmp(elfmag, ELFMAG, SELFMAG) != 0) {
 				m->dump_size = 0;
 			} else {
 				m->dump_size = PAGE_SIZE;

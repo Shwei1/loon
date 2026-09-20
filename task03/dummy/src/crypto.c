@@ -18,11 +18,13 @@
 static int ceph_crypt_get_context(struct inode *inode, void *ctx, size_t len)
 {
 	struct ceph_inode_info *ci = ceph_inode(inode);
-	struct ceph_fscrypt_auth *cfa = (struct ceph_fscrypt_auth *)ci->fscrypt_auth;
+	struct ceph_fscrypt_auth *cfa =
+		(struct ceph_fscrypt_auth *)ci->fscrypt_auth;
 	u32 ctxlen;
 
 	/* Non existent or too short? */
-	if (!cfa || (ci->fscrypt_auth_len < (offsetof(struct ceph_fscrypt_auth, cfa_blob) + 1)))
+	if (!cfa || (ci->fscrypt_auth_len <
+		     (offsetof(struct ceph_fscrypt_auth, cfa_blob) + 1)))
 		return -ENOBUFS;
 
 	/* Some format we don't recognize? */
@@ -41,8 +43,8 @@ static int ceph_crypt_set_context(struct inode *inode, const void *ctx,
 				  size_t len, void *fs_data)
 {
 	int ret;
-	struct iattr attr = { };
-	struct ceph_iattr cia = { };
+	struct iattr attr = {};
+	struct ceph_iattr cia = {};
 	struct ceph_fscrypt_auth *cfa;
 
 	WARN_ON_ONCE(fs_data);
@@ -80,13 +82,13 @@ static const union fscrypt_policy *ceph_get_dummy_policy(struct super_block *sb)
 }
 
 static struct fscrypt_operations ceph_fscrypt_ops = {
-	.inode_info_offs	= (int)offsetof(struct ceph_inode_info, i_crypt_info) -
-				  (int)offsetof(struct ceph_inode_info, netfs.inode),
-	.needs_bounce_pages	= 1,
-	.get_context		= ceph_crypt_get_context,
-	.set_context		= ceph_crypt_set_context,
-	.get_dummy_policy	= ceph_get_dummy_policy,
-	.empty_dir		= ceph_crypt_empty_dir,
+	.inode_info_offs = (int)offsetof(struct ceph_inode_info, i_crypt_info) -
+			   (int)offsetof(struct ceph_inode_info, netfs.inode),
+	.needs_bounce_pages = 1,
+	.get_context = ceph_crypt_get_context,
+	.set_context = ceph_crypt_set_context,
+	.get_dummy_policy = ceph_get_dummy_policy,
+	.empty_dir = ceph_crypt_empty_dir,
 };
 
 void ceph_fscrypt_set_ops(struct super_block *sb)
@@ -127,8 +129,8 @@ int ceph_fscrypt_prepare_context(struct inode *dir, struct inode *inode,
 	WARN_ON_ONCE(ci->fscrypt_auth);
 	kfree(ci->fscrypt_auth);
 	ci->fscrypt_auth_len = ceph_fscrypt_auth_len(as->fscrypt_auth);
-	ci->fscrypt_auth = kmemdup(as->fscrypt_auth, ci->fscrypt_auth_len,
-				   GFP_KERNEL);
+	ci->fscrypt_auth =
+		kmemdup(as->fscrypt_auth, ci->fscrypt_auth_len, GFP_KERNEL);
 	if (!ci->fscrypt_auth)
 		return -ENOMEM;
 
@@ -170,7 +172,8 @@ static struct inode *parse_longname(const struct inode *parent,
 	if (*name_len <= 0 || name[0] != '_')
 		return ERR_PTR(-EIO);
 	/* Skip initial '_' and NUL-terminate */
-	char *str __free(kfree) = kmemdup_nul(name + 1, *name_len - 1, GFP_KERNEL);
+	char *str __free(kfree) =
+		kmemdup_nul(name + 1, *name_len - 1, GFP_KERNEL);
 	if (!str)
 		return ERR_PTR(-ENOMEM);
 	name_end = strrchr(str, '_');
@@ -198,7 +201,8 @@ static struct inode *parse_longname(const struct inode *parent,
 		/* This can happen if we're not mounting cephfs on the root */
 		dir = ceph_get_inode(parent->i_sb, vino, NULL);
 		if (IS_ERR(dir))
-			doutc(cl, "can't find inode %s (%s)\n", inode_number, name);
+			doutc(cl, "can't find inode %s (%s)\n", inode_number,
+			      name);
 	}
 	return dir;
 }
@@ -243,8 +247,7 @@ int ceph_encode_encrypted_dname(struct inode *parent, char *buf, int elen)
 		goto out;
 	}
 
-	ret = fscrypt_fname_encrypt(dir,
-				    &(struct qstr)QSTR_INIT(p, name_len),
+	ret = fscrypt_fname_encrypt(dir, &(struct qstr)QSTR_INIT(p, name_len),
 				    cryptbuf, len);
 	if (ret) {
 		elen = ret;
@@ -358,9 +361,9 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
 		goto out_inode;
 	}
 
-	if (!tname && (fname->ctext_len == 0 ||
-		       unlikely(is_vmalloc_addr(fname->ctext)) ||
-		       unlikely(is_vmalloc_addr(oname->name)))) {
+	if (!tname &&
+	    (fname->ctext_len == 0 || unlikely(is_vmalloc_addr(fname->ctext)) ||
+	     unlikely(is_vmalloc_addr(oname->name)))) {
 		ret = fscrypt_fname_alloc_buffer(NAME_MAX, &_tname);
 		if (ret)
 			goto out_inode;
@@ -370,7 +373,8 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
 	if (fname->ctext_len == 0) {
 		int declen;
 
-		declen = base64_decode(name, name_len, tname, false, BASE64_IMAP);
+		declen = base64_decode(name, name_len, tname, false,
+				       BASE64_IMAP);
 		if (declen <= 0) {
 			ret = -EIO;
 			goto out;
@@ -387,7 +391,8 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
 		iname.len = fname->ctext_len;
 	}
 
-	_oname.name = unlikely(is_vmalloc_addr(oname->name)) ? tname : oname->name;
+	_oname.name = unlikely(is_vmalloc_addr(oname->name)) ? tname :
+								     oname->name;
 	_oname.len = oname->len;
 
 	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, &_oname);
@@ -451,8 +456,8 @@ int ceph_fscrypt_prepare_readdir(struct inode *dir)
 }
 
 int ceph_fscrypt_decrypt_block_inplace(const struct inode *inode,
-				  struct page *page, unsigned int len,
-				  unsigned int offs, u64 lblk_num)
+				       struct page *page, unsigned int len,
+				       unsigned int offs, u64 lblk_num)
 {
 	struct ceph_client *cl = ceph_inode_to_client(inode);
 
@@ -462,8 +467,8 @@ int ceph_fscrypt_decrypt_block_inplace(const struct inode *inode,
 }
 
 int ceph_fscrypt_encrypt_block_inplace(const struct inode *inode,
-				  struct page *page, unsigned int len,
-				  unsigned int offs, u64 lblk_num)
+				       struct page *page, unsigned int len,
+				       unsigned int offs, u64 lblk_num)
 {
 	struct ceph_client *cl = ceph_inode_to_client(inode);
 
@@ -487,8 +492,8 @@ int ceph_fscrypt_encrypt_block_inplace(const struct inode *inode,
  *
  * Returns the length of the decrypted data or a negative errno.
  */
-int ceph_fscrypt_decrypt_pages(struct inode *inode, struct page **page,
-			       u64 off, int len)
+int ceph_fscrypt_decrypt_pages(struct inode *inode, struct page **page, u64 off,
+			       int len)
 {
 	int i, num_blocks;
 	u64 baseblk = off >> CEPH_FSCRYPT_BLOCK_SHIFT;
@@ -507,9 +512,9 @@ int ceph_fscrypt_decrypt_pages(struct inode *inode, struct page **page,
 		unsigned int pgoffs = offset_in_page(blkoff);
 		int fret;
 
-		fret = ceph_fscrypt_decrypt_block_inplace(inode, page[pgidx],
-				CEPH_FSCRYPT_BLOCK_SIZE, pgoffs,
-				baseblk + i);
+		fret = ceph_fscrypt_decrypt_block_inplace(
+			inode, page[pgidx], CEPH_FSCRYPT_BLOCK_SIZE, pgoffs,
+			baseblk + i);
 		if (fret < 0) {
 			if (ret == 0)
 				ret = fret;
@@ -549,8 +554,8 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page,
 		return 0;
 	}
 
-	ceph_calc_file_object_mapping(&ci->i_layout, off, map[0].len,
-				      &objno, &objoff, &xlen);
+	ceph_calc_file_object_mapping(&ci->i_layout, off, map[0].len, &objno,
+				      &objoff, &xlen);
 
 	for (i = 0; i < ext_cnt; ++i) {
 		struct ceph_sparse_extent *ext = &map[i];
@@ -559,7 +564,8 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page,
 		int fret;
 
 		if ((ext->off | ext->len) & ~CEPH_FSCRYPT_BLOCK_MASK) {
-			pr_warn_client(cl,
+			pr_warn_client(
+				cl,
 				"%p %llx.%llx bad encrypted sparse extent "
 				"idx %d off %llx len %llx\n",
 				inode, ceph_vinop(inode), i, ext->off,
@@ -567,7 +573,7 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page,
 			return -EIO;
 		}
 		fret = ceph_fscrypt_decrypt_pages(inode, &page[pgidx],
-						 off + pgsoff, ext->len);
+						  off + pgsoff, ext->len);
 		doutc(cl, "%p %llx.%llx [%d] 0x%llx~0x%llx fret %d\n", inode,
 		      ceph_vinop(inode), i, ext->off, ext->len, fret);
 		if (fret < 0) {
@@ -596,7 +602,7 @@ int ceph_fscrypt_decrypt_extents(struct inode *inode, struct page **page,
  * Returns the length of the encrypted data or a negative errno.
  */
 int ceph_fscrypt_encrypt_pages(struct inode *inode, struct page **page, u64 off,
-				int len)
+			       int len)
 {
 	int i, num_blocks;
 	u64 baseblk = off >> CEPH_FSCRYPT_BLOCK_SHIFT;
@@ -615,9 +621,9 @@ int ceph_fscrypt_encrypt_pages(struct inode *inode, struct page **page, u64 off,
 		unsigned int pgoffs = offset_in_page(blkoff);
 		int fret;
 
-		fret = ceph_fscrypt_encrypt_block_inplace(inode, page[pgidx],
-				CEPH_FSCRYPT_BLOCK_SIZE, pgoffs,
-				baseblk + i);
+		fret = ceph_fscrypt_encrypt_block_inplace(
+			inode, page[pgidx], CEPH_FSCRYPT_BLOCK_SIZE, pgoffs,
+			baseblk + i);
 		if (fret < 0) {
 			if (ret == 0)
 				ret = fret;

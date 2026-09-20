@@ -13,31 +13,31 @@
 #include <linux/pci.h>
 #include <linux/pm_runtime.h>
 
-#define PCI_DEVICE_ID_AMD_MP2	0x15E6
+#define PCI_DEVICE_ID_AMD_MP2 0x15E6
 
 struct amd_i2c_common;
 struct amd_mp2_dev;
 
 enum {
 	/* MP2 C2P Message Registers */
-	AMD_C2P_MSG0 = 0x10500,			/* MP2 Message for I2C0 */
-	AMD_C2P_MSG1 = 0x10504,			/* MP2 Message for I2C1 */
-	AMD_C2P_MSG2 = 0x10508,			/* DRAM Address Lo / Data 0 */
-	AMD_C2P_MSG3 = 0x1050c,			/* DRAM Address HI / Data 1 */
-	AMD_C2P_MSG4 = 0x10510,			/* Data 2 */
-	AMD_C2P_MSG5 = 0x10514,			/* Data 3 */
-	AMD_C2P_MSG6 = 0x10518,			/* Data 4 */
-	AMD_C2P_MSG7 = 0x1051c,			/* Data 5 */
-	AMD_C2P_MSG8 = 0x10520,			/* Data 6 */
-	AMD_C2P_MSG9 = 0x10524,			/* Data 7 */
+	AMD_C2P_MSG0 = 0x10500, /* MP2 Message for I2C0 */
+	AMD_C2P_MSG1 = 0x10504, /* MP2 Message for I2C1 */
+	AMD_C2P_MSG2 = 0x10508, /* DRAM Address Lo / Data 0 */
+	AMD_C2P_MSG3 = 0x1050c, /* DRAM Address HI / Data 1 */
+	AMD_C2P_MSG4 = 0x10510, /* Data 2 */
+	AMD_C2P_MSG5 = 0x10514, /* Data 3 */
+	AMD_C2P_MSG6 = 0x10518, /* Data 4 */
+	AMD_C2P_MSG7 = 0x1051c, /* Data 5 */
+	AMD_C2P_MSG8 = 0x10520, /* Data 6 */
+	AMD_C2P_MSG9 = 0x10524, /* Data 7 */
 
 	/* MP2 P2C Message Registers */
-	AMD_P2C_MSG0 = 0x10680,			/* Do not use */
-	AMD_P2C_MSG1 = 0x10684,			/* I2C0 interrupt register */
-	AMD_P2C_MSG2 = 0x10688,			/* I2C1 interrupt register */
-	AMD_P2C_MSG3 = 0x1068C,			/* MP2 debug info */
-	AMD_P2C_MSG_INTEN = 0x10690,		/* MP2 interrupt gen register */
-	AMD_P2C_MSG_INTSTS = 0x10694,		/* Interrupt status */
+	AMD_P2C_MSG0 = 0x10680, /* Do not use */
+	AMD_P2C_MSG1 = 0x10684, /* I2C0 interrupt register */
+	AMD_P2C_MSG2 = 0x10688, /* I2C1 interrupt register */
+	AMD_P2C_MSG3 = 0x1068C, /* MP2 debug info */
+	AMD_P2C_MSG_INTEN = 0x10690, /* MP2 interrupt gen register */
+	AMD_P2C_MSG_INTSTS = 0x10694, /* Interrupt status */
 };
 
 /* Command register data structures */
