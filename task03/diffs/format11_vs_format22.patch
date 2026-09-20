@@ -1,0 +1,79 @@
+diff --git a/task03/dummy/src/coredump.c b/task03/dummy/src/coredump.c
+index b00e359..abee34d 100644
+--- a/task03/dummy/src/coredump.c
++++ b/task03/dummy/src/coredump.c
+@@ -1655,8 +1655,8 @@ static unsigned long vma_dump_size(struct vm_area_struct *vma,
+ 	/* By default, dump shared memory if mapped from an anonymous file. */
+ 	if (vma->vm_flags & VM_SHARED) {
+ 		if (file_inode(vma->vm_file)->i_nlink == 0 ?
+-				  FILTER(ANON_SHARED) :
+-				  FILTER(MAPPED_SHARED))
++			    FILTER(ANON_SHARED) :
++			    FILTER(MAPPED_SHARED))
+ 			goto whole;
+ 		return 0;
+ 	}
+diff --git a/task03/dummy/src/crypto.c b/task03/dummy/src/crypto.c
+index 583d17f..ff6066e 100644
+--- a/task03/dummy/src/crypto.c
++++ b/task03/dummy/src/crypto.c
+@@ -392,7 +392,7 @@ int ceph_fname_to_usr(const struct ceph_fname *fname, unsigned char *tname,
+ 	}
+ 
+ 	_oname.name = unlikely(is_vmalloc_addr(oname->name)) ? tname :
+-								     oname->name;
++							       oname->name;
+ 	_oname.len = oname->len;
+ 
+ 	ret = fscrypt_fname_disk_to_usr(dir, 0, 0, &iname, &_oname);
+diff --git a/task03/dummy/src/dir.c b/task03/dummy/src/dir.c
+index 1760ea6..3ea585a 100644
+--- a/task03/dummy/src/dir.c
++++ b/task03/dummy/src/dir.c
+@@ -383,7 +383,7 @@ more:
+ 	if (need_send_readdir(dfi, ctx->pos)) {
+ 		struct ceph_mds_request *req;
+ 		int op = ceph_snap(inode) == CEPH_SNAPDIR ? CEPH_MDS_OP_LSSNAP :
+-								  CEPH_MDS_OP_READDIR;
++							    CEPH_MDS_OP_READDIR;
+ 
+ 		/* discard old result, if any */
+ 		if (dfi->last_readdir) {
+@@ -505,8 +505,8 @@ more:
+ 				rinfo->dir_entries + (rinfo->dir_nr - 1);
+ 			unsigned next_offset =
+ 				req->r_reply_info.dir_end ?
+-					      2 :
+-					      (fpos_off(rde->offset) + 1);
++					2 :
++					(fpos_off(rde->offset) + 1);
+ 			err = note_last_dentry(fsc, dfi, rde->name,
+ 					       rde->name_len, next_offset);
+ 			if (err) {
+@@ -867,7 +867,7 @@ static struct dentry *ceph_lookup(struct inode *dir, struct dentry *dentry,
+ 	}
+ 
+ 	op = ceph_snap(dir) == CEPH_SNAPDIR ? CEPH_MDS_OP_LOOKUPSNAP :
+-						    CEPH_MDS_OP_LOOKUP;
++					      CEPH_MDS_OP_LOOKUP;
+ 	req = ceph_mdsc_create_request(mdsc, op, USE_ANY_MDS);
+ 	if (IS_ERR(req))
+ 		return ERR_CAST(req);
+@@ -1264,7 +1264,7 @@ static void ceph_async_unlink_cb(struct ceph_mds_client *mdsc,
+ 	struct ceph_client *cl = fsc->client;
+ 	struct ceph_dentry_info *di = ceph_dentry(dentry);
+ 	int result = req->r_err ? req->r_err :
+-					le32_to_cpu(req->r_reply_info.head->result);
++				  le32_to_cpu(req->r_reply_info.head->result);
+ 
+ 	if (!test_bit(CEPH_DENTRY_ASYNC_UNLINK_BIT, &di->flags))
+ 		pr_warn_client(cl,
+@@ -2026,7 +2026,7 @@ static int ceph_d_revalidate(struct inode *dir, const struct qstr *name,
+ 		percpu_counter_inc(&mdsc->metric.d_lease_mis);
+ 
+ 		op = ceph_snap(dir) == CEPH_SNAPDIR ? CEPH_MDS_OP_LOOKUPSNAP :
+-							    CEPH_MDS_OP_LOOKUP;
++						      CEPH_MDS_OP_LOOKUP;
+ 		req = ceph_mdsc_create_request(mdsc, op, USE_ANY_MDS);
+ 		if (!IS_ERR(req)) {
+ 			req->r_dentry = dget(dentry);
