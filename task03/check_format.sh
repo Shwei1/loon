@@ -5,6 +5,10 @@ print_help() {
     echo "Usage: ./check_format.sh [ROOT-DIR]"
 }
 
+clang_format_in_dir() {
+    [ -f "$1"/.clang-format ]
+}
+
 print_format() {
     echo "==== CLANG-FORMAT VERSION 11 ===="
     if clang-format-11 --dry-run -Werror -style=file "$1"/src/*.c "$1"/include/*.h > /dev/null 2>&1; then
@@ -37,10 +41,14 @@ case "$#" in
         exit 0
         ;;
     1)
+        if ! clang_format_in_dir "$1"; then
+            echo "Error: format file missing in $1"
+            exit 1
+        fi
         print_format "$1"
         ;;
     *)
-        echo "Too many arguments"
+        echo "Error: too many arguments"
         print_help
         exit 1
 esac
