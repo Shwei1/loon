@@ -59,3 +59,17 @@ All filles are formatted well
 
 ### Версія 22
 
+Результат `./check_format.sh` після форматування:
+
+```
+==== CLANG-FORMAT VERSION 11 ====
+Some files are formatted incorrectly
+=================================
+
+==== CLANG-FORMAT VERSION 22.1.8 ====
+All filles are formatted well
+=================================
+```
+
+При цьому `git diff -u` видає пустоту. Я підозрюю, що форматер дійсно нічого не змінив, а форматування `clang-format-11` з `chromium-11.clang-format` вже задовольняє останню версію `clang-format` з параметрами `chromium-22.clang-format`.
+ Вірогідніше за все, скрипт видає помилку при перевірці `clang-format-11` якраз через те, що новіший `clang-format` має недоступні старому опції.
