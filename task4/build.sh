@@ -37,7 +37,9 @@ case "$#" in
         compile "$1" 
         ;;
     2)
-        set_comp_params "$2"
+        if ! set_comp_params "$2"; then
+            exit 1
+        fi
         if ! compile "$1"; then
             exit 1
         fi
