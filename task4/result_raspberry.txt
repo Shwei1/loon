@@ -1,0 +1,6 @@
+Fri Sep 25 12:04:36 2026
+System name: Linux
+Architecture: aarch64
+Kernel release: 6.18.50+rpt-rpi-2712
+Kernel build info: #1 SMP PREEMPT Debian 1:6.18.50-1+rpt1 (2026-09-11)
+Host name: raspberrypi
