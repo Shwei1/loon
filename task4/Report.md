@@ -24,7 +24,7 @@ Machine:                           Advanced Micro Devices X86-64
 Динамічні залежності через `ldd`:
 
 ```
-	linux-vdso.so.1 (0x00007fb81a4ff000)
+  	linux-vdso.so.1 (0x00007fb81a4ff000)
 	libc.so.6 => /usr/lib/libc.so.6 (0x00007fb81a200000)
 	/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007fb81a501000)
 ```
@@ -40,5 +40,36 @@ Machine:                           Advanced Micro Devices X86-64
 
 Через `strings` можна подивитися символи, які збереглися в elf файлі. Там є ті самі позначки секцій програми, символи компілятора, назви функцій тощо.
 
+# Крос-компіляція для Raspberry Pi
 
+``` shell
+./build.sh print_info.c rpi
+```
+
+Скопіюємо виконувальний файл через SSH:
+``` shell
+scp print_info pi@raspberrypi.local:~
+```
+
+Результат виконання на таргеті:
+```
+Fri Sep 25 12:42:18 2026
+System name: Linux
+Architecture: aarch64
+Kernel release: 6.18.50+rpt-rpi-2712
+Kernel build info: #1 SMP PREEMPT Debian 1:6.18.50-1+rpt1 (2026-09-11)
+Host name: raspberrypi
+```
+
+Перевіримо архітектуру через `readelf -h`:
+
+```
+Machine: AArch64
+```
+
+Розмір секцій через `size`:
+```
+   text    data     bss     dec     hex filename
+   3041     720       8    3769     eb9 print_info
+```
 
