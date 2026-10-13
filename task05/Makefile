@@ -1,5 +1,5 @@
 override BUILD_DIR := build
-CROSS_COMPILE ?= aarch64-linux-gnu-
+CROSS_COMPILE ?= 
 
 CC := $(CROSS_COMPILE)gcc
 
