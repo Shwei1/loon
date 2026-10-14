@@ -7,7 +7,29 @@
 #include <string.h>
 #include <sys/types.h>
 #include <termios.h>
+#include <time.h>
 #include <unistd.h>
+#include <errno.h>
+#include <signal.h>
+
+static volatile sig_atomic_t should_terminate = 0;
+
+static void handle(int signal)
+{
+	(void)signal;
+	should_terminate = 1;
+}
+
+static void timestamp(char *buf, size_t size)
+{
+	time_t now = time(NULL);
+	struct tm tim;
+	localtime_r(&now, &tim);
+	if (strftime(buf, size, "%y%m%d_%H%M%S", &tim) == 0) {
+		fprintf(stderr, "strftime failed\n");
+		return;
+	};
+}
 
 static inline char toggle_case(char c)
 {
@@ -39,6 +61,9 @@ static ssize_t read_line(int fd, char *buf, size_t size)
 		ssize_t r = read(fd, &c, 1);
 
 		if (r < 0) {
+			if (errno == EINTR && !should_terminate) {
+				continue;
+			}
 			return -1;
 		}
 		if (r == 0) {
@@ -59,8 +84,29 @@ static ssize_t read_line(int fd, char *buf, size_t size)
 
 int main(int argc, char *argv[])
 {
+	struct sigaction sa = { 0 };
+	sa.sa_handler = &handle;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
+
 	if (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	char logfile_name[256] = { 0 };
+	char timestamp_str[64] = { 0 };
+	timestamp(timestamp_str, sizeof(timestamp_str));
+	strncat(logfile_name, "log_", 128);
+	strncat(logfile_name, timestamp_str, 128);
+	strncat(logfile_name, ".log", 128);
+
+	FILE *log = fopen(logfile_name, "a");
+	if (!log) {
+		perror("fopen");
 		return EXIT_FAILURE;
 	}
 
@@ -69,6 +115,10 @@ int main(int argc, char *argv[])
 	int fd = open(uart, O_RDWR | O_NOCTTY);
 
 	if (fd < 0) {
+		timestamp(timestamp_str, sizeof(timestamp_str));
+		fprintf(log, "[%s] UART initialization failed\n",
+			timestamp_str);
+		fclose(log);
 		perror("open");
 		return EXIT_FAILURE;
 	}
@@ -104,13 +154,17 @@ int main(int argc, char *argv[])
 	char line[1024] = { 0 };
 	char outp[1024 + 2] = { 0 };
 
-	while (true) {
+	while (!should_terminate) {
 		ssize_t len = read_line(fd, line, sizeof(line));
 		if (len < 0) {
-			perror("read_line");
-			goto failure;
+			if (!should_terminate) {
+				perror("read_line");
+			}
+			break;
 		}
-		printf("[LOG] Got message %s\n", line);
+		timestamp(timestamp_str, sizeof(timestamp_str));
+		fprintf(log, "[%s] Got message %s\n", timestamp_str, line);
+		fflush(log);
 
 		str_toggle_case(line, outp);
 		strcat(outp, "\r\n");
@@ -119,8 +173,8 @@ int main(int argc, char *argv[])
 		tcdrain(fd);
 	}
 
-failure:
 	close(fd);
+	fclose(log);
 
 	return EXIT_SUCCESS;
 }
