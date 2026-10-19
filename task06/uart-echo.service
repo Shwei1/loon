@@ -1,0 +1,17 @@
+[Unit]
+Description=UART case-toggle echo
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/uart-echo /dev/ttyAMA0
+KillSignal=SIGINT
+LogsDirectory=uart-echo
+WorkingDirectory=%L/uart-echo
+Restart=on-failure
+RestartSec=2
+User=shwei
+Group=dialout
+
+[Install]
+WantedBy=multi-user.target
