@@ -1,0 +1,22 @@
+----------------------------------------------------------------------------------------------------------------------------------
+NCDrill File Report For: TaskAltium.PcbDoc   04.11.2026  20:39:40
+----------------------------------------------------------------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII Plated RoundHoles File : TaskAltium-Plated.TXT
+ASCII Non-Plated RoundHoles File : TaskAltium-NonPlated.TXT
+
+Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
+----------------------------------------------------------------------------------------------------------------------------------
+T1      0.7mm (28mil)                                             Round             2         PTH        2.00mm (0.08inch)
+T2      0.711mm (28mil)                                           Round             14        PTH        218.61mm (8.61inch)
+T3      0.8mm (31mil)                                             Round             8         PTH        126.25mm (4.97inch)
+T4      0.813mm (32mil)                                           Round             6         PTH        35.56mm (1.40inch)
+T5      0.9mm (35mil)                                             Round             6         PTH        21.59mm (0.85inch)
+T6      1mm (39mil)                                               Round             67        PTH        279.38mm (11.00inch)
+T7      2.75mm (108mil)                                           Round             4         NPTH       165.50mm (6.52inch)
+T8      3.2mm (126mil)                                            Round             7         NPTH       130.71mm (5.15inch)
+----------------------------------------------------------------------------------------------------------------------------------
+Totals                                                                              114
+
+Total Processing Time (hh:mm:ss) : 00:00:00

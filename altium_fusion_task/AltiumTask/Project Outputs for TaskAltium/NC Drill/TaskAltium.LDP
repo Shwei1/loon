@@ -1,0 +1,3 @@
+Layer Pairs Export File for PCB: C:\Users\shwei\repos\loon\altium_fusion_task\AltiumTask\PCB\TaskAltium.PcbDoc
+LayersSetName=Top_Bot_Plated_Thru_Holes|DrillFile=taskaltium-plated.txt|DrillLayers=gtl,gbl
+LayersSetName=Top_Bot_NonPlated_Thru_Holes|DrillFile=taskaltium-nonplated.txt|DrillLayers=gtl,gbl

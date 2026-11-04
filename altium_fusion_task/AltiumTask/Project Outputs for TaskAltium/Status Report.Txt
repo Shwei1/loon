@@ -1,0 +1,10 @@
+Output: Bill of Materials
+Type  : BOM
+From  : Variant [[No Variations]] of Project [TaskAltium.PrjPcb]
+   Generated File[Bill of Materials-TaskAltium.xlsx]
+
+
+Files Generated   : 1
+Documents Printed : 0
+
+Finished Output Generation At 20:40:03 On 04.11.2026
