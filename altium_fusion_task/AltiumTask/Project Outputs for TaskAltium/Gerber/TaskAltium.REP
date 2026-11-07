@@ -2,10 +2,8 @@
 FileName = TaskAltium.GBR
 AutoAperture = True
 *************************************************************
-Generating : Bottom Solder
-      File : TaskAltium.GBS
-
-    Adding Layer      : Bottom Solder
+Generating : Bottom Layer
+      File : TaskAltium.GBL
 
     Adding Layer      : Bottom Layer
 
@@ -24,6 +22,9 @@ Used DCodes :
     D20
     D21
     D22
+    D23
+    D25
+    D26
 *************************************************************
 
 *************************************************************
@@ -52,55 +53,6 @@ Used DCodes :
 *************************************************************
 
 *************************************************************
-Generating : Bottom Overlay
-      File : TaskAltium.GBO
-
-    Adding Layer      : Bottom Overlay
-
-
-Used DCodes :
-    D11
-*************************************************************
-
-*************************************************************
-Generating : Top Overlay
-      File : TaskAltium.GTO
-
-    Adding Layer      : Top Overlay
-
-
-Used DCodes :
-    D10
-    D11
-*************************************************************
-
-*************************************************************
-Generating : Bottom Layer
-      File : TaskAltium.GBL
-
-    Adding Layer      : Bottom Layer
-
-    Adding Layer      : Multi-Layer
-
-
-Used DCodes :
-    D12
-    D13
-    D14
-    D15
-    D16
-    D17
-    D18
-    D19
-    D20
-    D21
-    D22
-    D23
-    D25
-    D26
-*************************************************************
-
-*************************************************************
 Generating : Top Layer
       File : TaskAltium.GTL
 
@@ -124,6 +76,54 @@ Used DCodes :
     D23
     D24
     D25
+*************************************************************
+
+*************************************************************
+Generating : Bottom Solder
+      File : TaskAltium.GBS
+
+    Adding Layer      : Bottom Solder
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D12
+    D13
+    D14
+    D15
+    D16
+    D17
+    D18
+    D19
+    D20
+    D21
+    D22
+*************************************************************
+
+*************************************************************
+Generating : Top Overlay
+      File : TaskAltium.GTO
+
+    Adding Layer      : Top Overlay
+
+
+Used DCodes :
+    D10
+    D11
+*************************************************************
+
+*************************************************************
+Generating : Bottom Overlay
+      File : TaskAltium.GBO
+
+    Adding Layer      : Bottom Overlay
+
+
+Used DCodes :
+    D11
 *************************************************************
 
 *************************************************************
